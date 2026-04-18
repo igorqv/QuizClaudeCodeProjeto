@@ -1,7 +1,11 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { NextResponse, NextRequest } from "next/server"
+import { z } from "zod"
 import { prisma } from "@/lib/prisma"
+
+const requestSchema = z.object({
+  guestName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  guestEmail: z.string().email("E-mail inválido"),
+})
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -12,15 +16,29 @@ function shuffle<T>(arr: T[]): T[] {
   return a
 }
 
-export async function POST() {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Não autenticado" }, { status: 401 })
+export async function POST(req: NextRequest) {
+  const body = await req.json()
+
+  const validation = requestSchema.safeParse(body)
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: "Nome e e-mail inválidos" },
+      { status: 400 }
+    )
   }
+
+  const { guestName, guestEmail } = validation.data
+
+  // Upsert guest player
+  const guest = await prisma.guestPlayer.upsert({
+    where: { email: guestEmail },
+    update: { name: guestName },
+    create: { name: guestName, email: guestEmail },
+  })
 
   // Abandon any in-progress sessions before starting a new one
   await prisma.gameSession.updateMany({
-    where: { userId: session.user.id, status: "in_progress" },
+    where: { guestId: guest.id, status: "in_progress" },
     data: { status: "abandoned" },
   })
 
@@ -41,7 +59,7 @@ export async function POST() {
   const selected = shuffle(all).slice(0, 10)
 
   const gameSession = await prisma.gameSession.create({
-    data: { userId: session.user.id },
+    data: { guestId: guest.id },
   })
 
   // Build question list: 4 shuffled options, correct NOT marked
@@ -54,5 +72,5 @@ export async function POST() {
     options: shuffle([q.correctAnswer, q.wrongAnswer1, q.wrongAnswer2, q.wrongAnswer3]),
   }))
 
-  return NextResponse.json({ sessionId: gameSession.id, questions })
+  return NextResponse.json({ sessionId: gameSession.id, guestId: guest.id, questions })
 }

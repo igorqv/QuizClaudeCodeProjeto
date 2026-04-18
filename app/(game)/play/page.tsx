@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import QuestionCard, { AnswerState } from "@/components/game/QuestionCard"
 import ResultScreen from "@/components/game/ResultScreen"
-import { LEVEL_NAMES, LEVEL_ICONS } from "@/lib/levels"
 
 interface Question {
   id: string
@@ -18,10 +17,8 @@ interface Question {
 interface FinishResult {
   roundScore: number
   correctCount: number
-  totalScore: number
-  newLevel: number
-  levelUp: boolean
-  newBadges: { key: string; name: string; icon: string; description: string }[]
+  bestScore: number
+  gamesPlayed: number
 }
 
 type Phase = "loading" | "playing" | "feedback" | "result" | "error"
@@ -29,6 +26,7 @@ type Phase = "loading" | "playing" | "feedback" | "result" | "error"
 interface GameState {
   phase: Phase
   sessionId: string | null
+  guestId: string | null
   questions: Question[]
   currentIdx: number
   roundScore: number
@@ -39,7 +37,7 @@ interface GameState {
 }
 
 type Action =
-  | { type: "GAME_STARTED"; sessionId: string; questions: Question[] }
+  | { type: "GAME_STARTED"; sessionId: string; guestId: string; questions: Question[] }
   | { type: "ANSWER_SUBMITTED" }
   | { type: "ANSWER_RECEIVED"; answerStates: AnswerState[]; pointsEarned: number; feedbackText: string }
   | { type: "NEXT_QUESTION" }
@@ -50,6 +48,7 @@ type Action =
 const initial: GameState = {
   phase: "loading",
   sessionId: null,
+  guestId: null,
   questions: [],
   currentIdx: 0,
   roundScore: 0,
@@ -62,7 +61,7 @@ const initial: GameState = {
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
     case "GAME_STARTED":
-      return { ...initial, phase: "playing", sessionId: action.sessionId, questions: action.questions }
+      return { ...initial, phase: "playing", sessionId: action.sessionId, guestId: action.guestId, questions: action.questions }
     case "ANSWER_SUBMITTED":
       return { ...state, phase: "feedback" }
     case "ANSWER_RECEIVED":
@@ -101,7 +100,6 @@ export default function PlayPage() {
     return () => clearTimeout(id)
   }, [countdown])
 
-  // Reset countdown when advancing to next question
   useEffect(() => {
     if (state.phase === "playing") setCountdown(null)
   }, [state.phase])
@@ -114,11 +112,27 @@ export default function PlayPage() {
     dispatch({ type: "RESET" })
     answeredRef.current = false
     try {
-      const res = await fetch("/api/game/start", { method: "POST" })
-      if (res.status === 401) { router.push("/login"); return }
+      const guestNameCookie = document.cookie.split("; ").find((c) => c.startsWith("guest_name="))?.split("=")[1] || ""
+      const guestEmailCookie = document.cookie.split("; ").find((c) => c.startsWith("guest_email="))?.split("=")[1] || ""
+
+      if (!guestNameCookie || !guestEmailCookie) {
+        router.push("/")
+        return
+      }
+
+      const res = await fetch("/api/game/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          guestName: decodeURIComponent(guestNameCookie),
+          guestEmail: decodeURIComponent(guestEmailCookie),
+        }),
+      })
+
       if (!res.ok) throw new Error("Falha ao iniciar")
       const data = await res.json()
-      dispatch({ type: "GAME_STARTED", sessionId: data.sessionId, questions: data.questions })
+      sessionStorage.setItem("guestId", data.guestId)
+      dispatch({ type: "GAME_STARTED", sessionId: data.sessionId, guestId: data.guestId, questions: data.questions })
     } catch {
       dispatch({ type: "ERROR", errorMsg: "Não foi possível iniciar o jogo. Tente novamente." })
     }
@@ -126,12 +140,12 @@ export default function PlayPage() {
 
   const handleAnswer = useCallback(
     async (chosenAnswer: string, optionIndex: number, expired = false) => {
-      if (answeredRef.current || !state.sessionId) return
+      if (answeredRef.current || !state.sessionId || !state.guestId) return
       answeredRef.current = true
       dispatch({ type: "ANSWER_SUBMITTED" })
 
-      // Capture to avoid stale closures inside setTimeout
       const capturedSessionId = state.sessionId
+      const capturedGuestId = state.guestId
       const capturedIdx = state.currentIdx
       const capturedTotal = state.questions.length
       const capturedOptions = state.questions[state.currentIdx].options
@@ -148,7 +162,7 @@ export default function PlayPage() {
             const res = await fetch("/api/game/finish", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ sessionId: capturedSessionId }),
+              body: JSON.stringify({ sessionId: capturedSessionId, guestId: capturedGuestId }),
             })
             const data = await res.json()
             dispatch({ type: "GAME_FINISHED", finishResult: data })
@@ -164,6 +178,7 @@ export default function PlayPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             sessionId: capturedSessionId,
+            guestId: capturedGuestId,
             questionId: capturedQuestionId,
             chosenAnswer: expired ? "" : chosenAnswer,
           }),
@@ -194,7 +209,7 @@ export default function PlayPage() {
         setTimeout(() => advance(), 500)
       }
     },
-    [state.sessionId, state.currentIdx, state.questions]
+    [state.sessionId, state.guestId, state.currentIdx, state.questions]
   )
 
   const handleTimerExpire = useCallback(() => {
@@ -244,12 +259,8 @@ export default function PlayPage() {
       <ResultScreen
         roundScore={state.finishResult.roundScore}
         correctCount={state.finishResult.correctCount}
-        totalScore={state.finishResult.totalScore}
-        newLevel={state.finishResult.newLevel}
-        levelUp={state.finishResult.levelUp}
-        newBadges={state.finishResult.newBadges}
-        levelName={LEVEL_NAMES[state.finishResult.newLevel]}
-        levelIcon={LEVEL_ICONS[state.finishResult.newLevel]}
+        bestScore={state.finishResult.bestScore}
+        gamesPlayed={state.finishResult.gamesPlayed}
       />
     )
   }

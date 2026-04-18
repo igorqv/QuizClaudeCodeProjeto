@@ -14,7 +14,14 @@
       "Bash(npx tsc *)",
       "Bash(git rm *)",
       "Bash(git add *)",
-      "Bash(git commit -m 'ajuste para o Vercel')"
+      "Bash(git commit -m 'ajuste para o Vercel')",
+      "Bash(git commit -m 'Corrigir bug de login silencioso apos cadastro *)",
+      "Bash(git push *)",
+      "Bash(export DIRECT_URL=\"postgresql://postgres.ftjprxuxehngntthfmca:kvOTfUpnDhFL0Eqn@db.ftjprxuxehngntthfmca.supabase.co:5432/postgres\")",
+      "Bash(export DIRECT_URL=\"postgresql://postgres.ftjprxuxehngntthfmca:kvOTfUpnDhFL0Eqn@aws-1-us-west-2.pooler.supabase.com:5432/postgres\")",
+      "Bash(rm -f app/providers.tsx 'app/\\(auth\\)/login/page.tsx' 'app/\\(auth\\)/register/page.tsx' app/dashboard/page.tsx app/profile/page.tsx lib/auth.ts lib/levels.ts types/next-auth.d.ts)",
+      "Bash(rm -rf app/api/auth app/api/user)",
+      "Bash(git commit -m 'ajuste de entrada no quiz')"
     ]
   }
 }

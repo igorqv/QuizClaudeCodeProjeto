@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import { Nunito } from "next/font/google"
 import "./globals.css"
-import { Providers } from "./providers"
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -17,9 +16,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body className={`${nunito.variable} font-sans`}>
-        <Providers>{children}</Providers>
-      </body>
+      <body className={`${nunito.variable} font-sans`}>{children}</body>
     </html>
   )
 }

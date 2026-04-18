@@ -1,46 +1,39 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
-import { LEVEL_NAMES, LEVEL_ICONS } from "@/lib/levels"
+
+interface RankingEntry {
+  position: number
+  name: string
+  bestScore: number
+}
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
+  const cookieStore = await cookies()
+  const guestEmail = cookieStore.get("guest_email")?.value
 
-  const top10 = await prisma.user.findMany({
-    orderBy: { totalScore: "desc" },
-    take: 10,
-    select: { id: true, name: true, avatarId: true, level: true, totalScore: true },
+  const guests = await prisma.guestPlayer.findMany({
+    select: { name: true, bestScore: true, email: true },
   })
 
-  const ranking = top10.map((u, i) => ({
-    position: i + 1,
-    id: u.id,
-    name: u.name,
-    avatarId: u.avatarId,
-    level: u.level,
-    levelName: LEVEL_NAMES[u.level],
-    levelIcon: LEVEL_ICONS[u.level],
-    totalScore: u.totalScore,
-  }))
+  const ranking = guests
+    .sort((a, b) => b.bestScore - a.bestScore)
+    .slice(0, 10)
+    .map((g, i): RankingEntry => ({
+      position: i + 1,
+      name: g.name,
+      bestScore: g.bestScore,
+    }))
 
-  let userPosition = null
-  if (session?.user?.id) {
-    const userId = session.user.id
-    const inTop10 = ranking.find((r) => r.id === userId)
-    if (!inTop10) {
-      const me = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { id: true, name: true, avatarId: true, level: true, totalScore: true },
-      })
-      if (me) {
-        const ahead = await prisma.user.count({ where: { totalScore: { gt: me.totalScore } } })
-        userPosition = {
-          position: ahead + 1,
-          ...me,
-          levelName: LEVEL_NAMES[me.level],
-          levelIcon: LEVEL_ICONS[me.level],
-        }
+  let userPosition: RankingEntry | null = null
+  if (guestEmail) {
+    const me = guests.find((g) => g.email === guestEmail)
+    if (me && !ranking.find((r) => r.name === me.name && r.bestScore === me.bestScore)) {
+      const ahead = guests.filter((g) => g.bestScore > me.bestScore).length
+      userPosition = {
+        position: ahead + 1,
+        name: me.name,
+        bestScore: me.bestScore,
       }
     }
   }

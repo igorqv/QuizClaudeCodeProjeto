@@ -1,21 +1,20 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { getServerSession } from "next-auth"
-import { ZodError } from "zod"
-import { authOptions } from "@/lib/auth"
+import { z, ZodError } from "zod"
 import { prisma } from "@/lib/prisma"
 import { calculatePoints } from "@/lib/scoring"
-import { answerSchema } from "@/lib/validators"
+
+const answerSchema = z.object({
+  sessionId: z.string().cuid(),
+  guestId: z.string().cuid(),
+  questionId: z.string().cuid(),
+  chosenAnswer: z.string(),
+})
 
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Não autenticado" }, { status: 401 })
-  }
-
   try {
     const body = await request.json()
-    const { sessionId, questionId, chosenAnswer } = answerSchema.parse(body)
+    const { sessionId, guestId, questionId, chosenAnswer } = answerSchema.parse(body)
 
     const gameSession = await prisma.gameSession.findUnique({
       where: { id: sessionId },
@@ -27,7 +26,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    if (!gameSession || gameSession.userId !== session.user.id) {
+    if (!gameSession || gameSession.guestId !== guestId) {
       return NextResponse.json({ error: "Sessão inválida" }, { status: 404 })
     }
     if (gameSession.status !== "in_progress") {
@@ -42,7 +41,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Pergunta não encontrada" }, { status: 404 })
     }
 
-    // Calculate time server-side: elapsed since last answer (or session start for first question)
     const lastAnswer = gameSession.answers[0]
     const questionStartTime = lastAnswer?.answeredAt ?? gameSession.startedAt
     const serverTimeSpentMs = Math.min(Date.now() - questionStartTime.getTime(), 65000)
