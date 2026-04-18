@@ -31,7 +31,13 @@ export default function RegisterPage() {
       return
     }
 
-    await signIn("credentials", { email, password, redirect: false })
+    const result = await signIn("credentials", { email, password, redirect: false })
+    if (result?.error) {
+      setError("Conta criada, mas não foi possível entrar automaticamente. Faça login.")
+      setLoading(false)
+      router.push("/login")
+      return
+    }
     router.push("/dashboard")
     router.refresh()
   }
