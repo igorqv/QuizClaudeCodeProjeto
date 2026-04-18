@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  avatarId     Int       @default(1)
+  totalScore   Int       @default(0)
+  level        Int       @default(1)
+  gamesPlayed  Int       @default(0)
+  totalCorrect Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  sessions   GameSession[]
+  userBadges UserBadge[]
+}
+
+model Question {
+  id            String @id @default(cuid())
+  number        Int    @unique
+  theme         String
+  difficulty    String
+  basePoints    Int
+  questionText  String
+  correctAnswer String
+  wrongAnswer1  String
+  wrongAnswer2  String
+  wrongAnswer3  String
+  explanation   String
+
+  sessionAnswers SessionAnswer[]
+
+  @@index([theme, difficulty])
+}
+
+model GameSession {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  score        Int       @default(0)
+  correctCount Int       @default(0)
+  status       String    @default("in_progress")
+  startedAt    DateTime  @default(now())
+  finishedAt   DateTime?
+
+  answers SessionAnswer[]
+
+  @@index([userId])
+}
+
+model SessionAnswer {
+  id           String      @id @default(cuid())
+  sessionId    String
+  session      GameSession @relation(fields: [sessionId], references: [id])
+  questionId   String
+  question     Question    @relation(fields: [questionId], references: [id])
+  chosenAnswer String
+  isCorrect    Boolean
+  timeSpentMs  Int
+  pointsEarned Int
+  answeredAt   DateTime    @default(now())
+}
+
+model Badge {
+  id          String @id @default(cuid())
+  key         String @unique
+  name        String
+  description String
+  icon        String
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  badgeId  String
+  badge    Badge    @relation(fields: [badgeId], references: [id])
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
+}

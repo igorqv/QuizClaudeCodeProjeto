@@ -1,0 +1,8 @@
+{
+  "/dashboard/page": "app/dashboard/page.js",
+  "/api/game/answer/route": "app/api/game/answer/route.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/game/start/route": "app/api/game/start/route.js",
+  "/(game)/play/page": "app/(game)/play/page.js",
+  "/ranking/page": "app/ranking/page.js"
+}

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd //c \"where node 2>nul && where npx 2>nul\")",
+      "Bash(cmd //c \"node --version\")",
+      "Bash(cmd //c \"npm --version\")",
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Read(//c/Users/iquei/AppData/Local/Temp/claude/C--igorqv-git-QuizClaudeCodeProjeto/e1cf8269-18af-4bf6-ba2f-411189689310/tasks/**)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(echo \"---DONE:$?---\")",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)"
+    ]
+  }
+}
