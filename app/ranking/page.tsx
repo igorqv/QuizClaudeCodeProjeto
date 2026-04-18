@@ -1,15 +1,45 @@
 import Link from "next/link"
 import { cookies } from "next/headers"
+import { prisma } from "@/lib/prisma"
 
 async function getRankingData() {
-  const res = await fetch("http://localhost:3000/api/ranking", { cache: "no-store" })
-  return res.json()
+  const guests = await prisma.guestPlayer.findMany({
+    select: { name: true, bestScore: true, email: true },
+  })
+
+  const ranking = guests
+    .sort((a, b) => b.bestScore - a.bestScore)
+    .slice(0, 10)
+    .map((g, i) => ({
+      position: i + 1,
+      name: g.name,
+      bestScore: g.bestScore,
+    }))
+
+  return { ranking }
 }
 
 export default async function RankingPage() {
-  const { ranking, userPosition } = await getRankingData()
+  const { ranking } = await getRankingData()
   const cookieStore = await cookies()
   const guestEmail = cookieStore.get("guest_email")?.value
+
+  const guests = await prisma.guestPlayer.findMany({
+    select: { name: true, bestScore: true, email: true },
+  })
+
+  let userPosition = null
+  if (guestEmail) {
+    const me = guests.find((g) => g.email === decodeURIComponent(guestEmail))
+    if (me && !ranking.find((r) => r.name === me.name && r.bestScore === me.bestScore)) {
+      const ahead = guests.filter((g) => g.bestScore > me.bestScore).length
+      userPosition = {
+        position: ahead + 1,
+        name: me.name,
+        bestScore: me.bestScore,
+      }
+    }
+  }
 
   const MEDALS: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" }
 
