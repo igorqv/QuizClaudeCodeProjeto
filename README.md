@@ -1,4 +1,4 @@
-# QuizBrasil - Quiz Educacional Interativo
+# QuizBrasil - Quiz Educacional Interativo 
 
 **Versão:** 1.0  
 **Data:** 18/04/2026  
@@ -6,7 +6,7 @@
 
 ## 📖 Descrição
 
-QuizBrasil é uma plataforma web interativa de quiz educacional desenvolvida para crianças entre 7 e 14 anos. O projeto oferece uma experiência gamificada com 145 questões sobre temas brasileiros, incluindo História, Geografia, Ciências, Folclore e mais.
+Projeto pessoal criado Claude Code. O QuizBrasil é uma plataforma web interativa de quiz educacional desenvolvida para crianças entre 7 e 14 anos. O projeto oferece uma experiência gamificada com 145 questões sobre temas brasileiros, incluindo História, Geografia, Ciências, Folclore e mais.
 
 O game mantém um sistema ranking de pontuação por 7 dias. O sistema utiliza o e-mail e nome como identificação do usuário, a maior pontuação do usuario fica disponivel no ranking. O objetivo maior é a criança ler, aprender e responder de forma correta. QUanto maior o acerto o nivel da pergunta aumenta.
 
@@ -110,15 +110,6 @@ npx prisma db seed # Re-popula dados (idempotente)
 
 História, Geografia, Ciências, Folclore, Literatura, Arte, Esportes, Política, Economia, Tecnologia, Culinária e Natureza.
 
-## 📊 Níveis e Thresholds
-
-| Nível | Nome | Pontos Necessários |
-|-------|------|-------------------|
-| 1 | Curioso | 0 |
-| 2 | Aprendiz | 500 |
-| 3 | Conhecedor | 2.000 |
-| 4 | Especialista | 5.000 |
-| 5 | Mestre | 10.000 |
 
 ## 🔒 Segurança
 
