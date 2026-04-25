@@ -4,12 +4,16 @@ import { prisma } from "@/lib/prisma"
 import HomeForm from "@/components/HomeForm"
 
 async function getTop3() {
-  return prisma.guestPlayer.findMany({
-    select: { name: true, bestScore: true },
-    orderBy: { bestScore: "desc" },
-    take: 3,
-    where: { bestScore: { gt: 0 } },
-  })
+  try {
+    return await prisma.guestPlayer.findMany({
+      select: { name: true, bestScore: true },
+      orderBy: { bestScore: "desc" },
+      take: 3,
+      where: { bestScore: { gt: 0 } },
+    })
+  } catch {
+    return []
+  }
 }
 
 export default async function HomePage() {
