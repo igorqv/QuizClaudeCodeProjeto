@@ -9,16 +9,21 @@ datasource db {
 }
 
 model GuestPlayer {
-  id          String        @id @default(cuid())
-  name        String
-  email       String        @unique
-  bestScore   Int           @default(0)
-  gamesPlayed Int           @default(0)
-  createdAt   DateTime      @default(now())
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  bestScore     Int      @default(0)
+  totalScore    Int      @default(0)
+  totalCorrect  Int      @default(0)
+  totalAnswered Int      @default(0)
+  gamesPlayed   Int      @default(0)
+  createdAt     DateTime @default(now())
 
   sessions GameSession[]
+  badges   UserBadge[]
 
   @@index([email])
+  @@index([bestScore])
 }
 
 model Question {
@@ -40,24 +45,26 @@ model Question {
 }
 
 model GameSession {
-  id           String        @id @default(cuid())
-  guestId      String
-  guest        GuestPlayer   @relation(fields: [guestId], references: [id])
-  score        Int           @default(0)
-  correctCount Int           @default(0)
-  status       SessionStatus @default(in_progress)
-  startedAt    DateTime      @default(now())
-  finishedAt   DateTime?
+  id             String        @id @default(cuid())
+  guestId        String
+  guest          GuestPlayer   @relation(fields: [guestId], references: [id])
+  score          Int           @default(0)
+  correctCount   Int           @default(0)
+  livesRemaining Int           @default(3)
+  status         SessionStatus @default(in_progress)
+  startedAt      DateTime      @default(now())
+  finishedAt     DateTime?
 
   answers SessionAnswer[]
 
   @@index([guestId])
+  @@index([finishedAt])
 }
 
 model SessionAnswer {
   id           String      @id @default(cuid())
   sessionId    String
-  session      GameSession @relation(fields: [sessionId], references: [id])
+  session      GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   questionId   String
   question     Question    @relation(fields: [questionId], references: [id])
   chosenAnswer String
@@ -65,6 +72,28 @@ model SessionAnswer {
   timeSpentMs  Int
   pointsEarned Int
   answeredAt   DateTime    @default(now())
+}
+
+model Badge {
+  id          String @id @default(cuid())
+  key         String @unique
+  name        String
+  description String
+  icon        String
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  id       String      @id @default(cuid())
+  guestId  String
+  guest    GuestPlayer @relation(fields: [guestId], references: [id])
+  badgeId  String
+  badge    Badge       @relation(fields: [badgeId], references: [id])
+  earnedAt DateTime    @default(now())
+
+  @@unique([guestId, badgeId])
+  @@index([guestId])
 }
 
 enum SessionStatus {

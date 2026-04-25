@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       where: { id: sessionId },
       include: {
         answers: {
-          select: { questionId: true, answeredAt: true },
+          select: { questionId: true, answeredAt: true, isCorrect: true },
           orderBy: { answeredAt: "desc" },
         },
       },
@@ -46,7 +46,21 @@ export async function POST(request: NextRequest) {
     const serverTimeSpentMs = Math.min(Date.now() - questionStartTime.getTime(), 65000)
 
     const isCorrect = chosenAnswer === question.correctAnswer
-    const pointsEarned = calculatePoints(question.difficulty, isCorrect, serverTimeSpentMs)
+
+    // Calculate streak: consecutive correct answers before this one (desc order)
+    let prevStreak = 0
+    for (const ans of gameSession.answers) {
+      if (ans.isCorrect) prevStreak++
+      else break
+    }
+    const newStreak = isCorrect ? prevStreak + 1 : 0
+
+    const pointsEarned = calculatePoints(question.difficulty, isCorrect, serverTimeSpentMs, newStreak)
+
+    const newLives = isCorrect
+      ? gameSession.livesRemaining
+      : Math.max(0, gameSession.livesRemaining - 1)
+    const gameOver = !isCorrect && newLives === 0
 
     await prisma.sessionAnswer.create({
       data: {
@@ -64,6 +78,8 @@ export async function POST(request: NextRequest) {
       data: {
         score: { increment: pointsEarned },
         correctCount: { increment: isCorrect ? 1 : 0 },
+        livesRemaining: newLives,
+        ...(gameOver ? { status: "completed", finishedAt: new Date() } : {}),
       },
     })
 
@@ -72,6 +88,9 @@ export async function POST(request: NextRequest) {
       correctAnswer: question.correctAnswer,
       explanation: question.explanation,
       pointsEarned,
+      livesRemaining: newLives,
+      gameOver,
+      streak: newStreak,
     })
   } catch (error) {
     if (error instanceof ZodError) {

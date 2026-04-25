@@ -23,7 +23,16 @@
       "Bash(rm -rf app/api/auth app/api/user)",
       "Bash(git commit -m 'ajuste de entrada no quiz')",
       "Bash(git commit *)",
-      "Bash(git pull *)"
+      "Bash(git pull *)",
+      "Bash(cat C:\\\\\\\\Users\\\\\\\\iquei\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\C--igorqv-git-QuizClaudeCodeProjeto\\\\\\\\c4070075-271e-4e44-aa2d-602778a28f89\\\\\\\\tasks\\\\\\\\bz3ettf3n.output)",
+      "Bash(DIRECT_URL=\"postgresql://postgres.ftjprxuxehngntthfmca:kvOTfUpnDhFL0Eqn@aws-0-us-west-2.pooler.supabase.com:6543/postgres\" npx prisma migrate dev --name ranking-cascade-index)",
+      "Bash(DIRECT_URL=\"postgresql://postgres.ftjprxuxehngntthfmca:kvOTfUpnDhFL0Eqn@aws-1-us-west-2.pooler.supabase.com:5432/postgres\" npx prisma migrate dev --name ranking-cascade-index)",
+      "Bash(DIRECT_URL=\"postgresql://postgres.ftjprxuxehngntthfmca:kvOTfUpnDhFL0Eqn@aws-1-us-west-2.pooler.supabase.com:5432/postgres\" npx prisma db push)",
+      "Bash(taskkill /F /IM node.exe)",
+      "PowerShell(Stop-Process *)",
+      "Bash(cat \"C:\\\\\\\\Users\\\\\\\\iquei\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\C--igorqv-git-QuizClaudeCodeProjeto\\\\\\\\c4070075-271e-4e44-aa2d-602778a28f89\\\\\\\\tasks\\\\\\\\bt5wkltgl.output\")",
+      "Bash(cat \"C:\\\\\\\\Users\\\\\\\\iquei\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\C--igorqv-git-QuizClaudeCodeProjeto\\\\\\\\c4070075-271e-4e44-aa2d-602778a28f89\\\\\\\\tasks\\\\\\\\bzrssvun6.output\")",
+      "Bash(node *)"
     ]
   }
 }

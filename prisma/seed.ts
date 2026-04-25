@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client"
 import { readFileSync } from "fs"
 import { join } from "path"
+import { BADGE_DEFINITIONS } from "../lib/levels"
 
 const prisma = new PrismaClient()
 
@@ -32,6 +33,17 @@ async function main() {
     })
   }
   console.log(`✅ ${questions.length} perguntas inseridas`)
+
+  // Seed badges
+  for (const b of BADGE_DEFINITIONS) {
+    await prisma.badge.upsert({
+      where: { key: b.key },
+      update: { name: b.name, description: b.description, icon: b.icon },
+      create: b,
+    })
+  }
+  console.log(`🏅 ${BADGE_DEFINITIONS.length} badges inseridos`)
+
   console.log("🎉 Seed concluído!")
 }
 

@@ -9,8 +9,8 @@ const nunito = Nunito({
 })
 
 export const metadata: Metadata = {
-  title: "QuizBrasil",
-  description: "Quiz educativo sobre o Brasil e o mundo para crianças e jovens",
+  title: "Curiosamente",
+  description: "Aprenda jogando! Quiz de cultura geral sobre o Brasil e o mundo para jovens.",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

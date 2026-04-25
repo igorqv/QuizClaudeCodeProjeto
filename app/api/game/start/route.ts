@@ -29,14 +29,12 @@ export async function POST(req: NextRequest) {
 
   const { guestName, guestEmail } = validation.data
 
-  // Upsert guest player
   const guest = await prisma.guestPlayer.upsert({
     where: { email: guestEmail },
     update: { name: guestName },
     create: { name: guestName, email: guestEmail },
   })
 
-  // Abandon any in-progress sessions before starting a new one
   await prisma.gameSession.updateMany({
     where: { guestId: guest.id, status: "in_progress" },
     data: { status: "abandoned" },
@@ -56,14 +54,17 @@ export async function POST(req: NextRequest) {
     },
   })
 
-  const selected = shuffle(all).slice(0, 10)
+  // Shuffle within each difficulty group, then concatenate easy → medium → hard
+  const easy = shuffle(all.filter((q) => q.difficulty === "easy"))
+  const medium = shuffle(all.filter((q) => q.difficulty === "medium"))
+  const hard = shuffle(all.filter((q) => q.difficulty === "hard"))
+  const ordered = [...easy, ...medium, ...hard]
 
   const gameSession = await prisma.gameSession.create({
     data: { guestId: guest.id },
   })
 
-  // Build question list: 4 shuffled options, correct NOT marked
-  const questions = selected.map((q) => ({
+  const questions = ordered.map((q) => ({
     id: q.id,
     number: q.number,
     theme: q.theme,
