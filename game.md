@@ -1,6 +1,6 @@
 # 🎴 Jogo de Cards Educativo — Perguntas & Respostas
 
-> **150 cartas** divididas em 10 temas | Faixa etária: 7 a 15 anos  
+> **195 perguntas** divididas em 16 temas | Faixa etária: 7 a 15 anos  
 > Pontuação: **Fácil = 2 pts** | **Médio = 4 pts** | **Difícil = 6 pts**
 
 ---

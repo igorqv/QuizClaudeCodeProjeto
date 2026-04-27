@@ -33,7 +33,9 @@
       "Bash(cat \"C:\\\\\\\\Users\\\\\\\\iquei\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\C--igorqv-git-QuizClaudeCodeProjeto\\\\\\\\c4070075-271e-4e44-aa2d-602778a28f89\\\\\\\\tasks\\\\\\\\bt5wkltgl.output\")",
       "Bash(cat \"C:\\\\\\\\Users\\\\\\\\iquei\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\C--igorqv-git-QuizClaudeCodeProjeto\\\\\\\\c4070075-271e-4e44-aa2d-602778a28f89\\\\\\\\tasks\\\\\\\\bzrssvun6.output\")",
       "Bash(node *)",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(grep *)",
+      "Bash(PGPASSWORD=\"kvOTfUpnDhFL0Eqn\" psql *)"
     ]
   }
 }

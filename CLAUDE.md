@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 > **Status:** Greenfield project — only documentation exists (`prd.md`, `game.md`). No application code has been written yet. All directory structure and commands below are the planned target state.
 
 **QuizBrasil** is a web-based educational quiz game for children aged 7-14, featuring:
-- 145 questions across 12 themes (History, Geography, Science, Folklore, etc.)
+- 195 questions across 16 themes (History, Geography, Science, Folklore, Pop Culture, Space, etc.)
 - Real-time scoring with speed bonuses (0–60s timer per question)
 - Level progression (5 levels: Curioso → Mestre)
 - Badge system (11 badges for achievements)
@@ -85,14 +85,14 @@ quiz-brasil/
 │
 ├── prisma/
 │   ├── schema.prisma             # Database schema (User, Question, GameSession, etc.)
-│   └── seed.ts                   # Populate DB: 145 questions + 11 badges
+│   └── seed.ts                   # Populate DB: 195 questions + 11 badges
 │
 ├── public/
 │   └── avatars/                  # Pre-defined avatar SVGs (1-12 options)
 │
 ├── .env.local                    # Local env vars (DATABASE_URL, NEXTAUTH_SECRET, etc.)
 ├── prd.md                        # Product Requirements Document
-├── game.md                        # 145 questions in markdown table format (source of truth)
+├── game.md                        # 195 questions in markdown table format (source of truth)
 └── package.json
 ```
 
@@ -103,7 +103,7 @@ quiz-brasil/
 **Key models:**
 
 - **User**: id, email, passwordHash, avatarId, totalScore (cumulative), level, gamesPlayed, totalCorrect
-- **Question**: id (cuid), number (1–145), theme, difficulty (easy/medium/hard), basePoints (20/40/60), questionText, correctAnswer, wrongAnswer1/2/3, explanation
+- **Question**: id (cuid), number (1–195), theme, difficulty (easy/medium/hard), basePoints (20/40/60), questionText, correctAnswer, wrongAnswer1/2/3, explanation
 - **GameSession**: id, userId (FK), score, correctCount, status, startedAt, finishedAt
 - **SessionAnswer**: id, sessionId (FK), questionId (FK), chosenAnswer (string), isCorrect (bool), timeSpentMs (int), pointsEarned (int)
 - **Badge**: id, key (e.g., "first_answer"), name, description, icon (emoji)
@@ -125,7 +125,7 @@ See `prd.md` section 5.4 for full schema.
 npm install
 cp .env.example .env.local          # Set DATABASE_URL and NEXTAUTH_SECRET
 npx prisma migrate dev              # Create tables
-npx prisma db seed                  # Populate 145 questions + 11 badges
+npx prisma db seed                  # Populate 195 questions + 11 badges
 ```
 
 ### Development
@@ -159,7 +159,7 @@ npx tsc --noEmit                   # TypeScript check
 ## Important Design Decisions & Constraints
 
 ### 1. Question Randomization
-- **Each round:** exactly 10 questions randomly selected from 145
+- **Each round:** exactly 10 questions randomly selected from 195
 - **No repeats within a round** (use `shuffle(questions).slice(0, 10)`)
 - **Mixed difficulty & theme** — no curation; purely random
 
@@ -205,8 +205,8 @@ Check badge criteria **after each round completes** in `/api/game/finish`:
 - **Vibrant palette:** avoid grays; use the color scheme in PRD section 7.1
 
 ### 7. Questions Data (game.md)
-- **145 questions** (not 150 — PRD has a discrepancy; `game.md` is the source of truth)
-- Distribution: 57 easy (🟢), 52 medium (🟡), 36 hard (🔴) — verify counts on re-seed
+- **195 questions** across 16 themes (source of truth in database)
+- Distribution: varies by theme — verify counts on updates
 - Organized in markdown tables, one per theme section
 - Only the **correct answer** is in `game.md`; **3 wrong answers per question must be added in `seed.ts`**
 
@@ -365,7 +365,7 @@ When starting implementation, these files have the most impact:
 | **Speed Bonus** | Multiplier applied to points based on time spent (≤15s = ×2.0, etc.) |
 | **Level** | Progression indicator based on cumulative score (1–5) |
 | **Badge** | Achievement unlocked by meeting specific criteria |
-| **Seed** | Script that populates database with initial data (145 questions, 11 badges) |
+| **Seed** | Script that populates database with initial data (195 questions, 11 badges) |
 
 ---
 
