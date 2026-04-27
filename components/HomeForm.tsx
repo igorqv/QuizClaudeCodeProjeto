@@ -65,7 +65,7 @@ export default function HomeForm({ top3 }: HomeFormProps) {
           </motion.div>
           <h1 className="text-5xl font-black text-white tracking-tight">Curiosamente</h1>
           <p className="text-blue-300 mt-2 text-base">
-            145 perguntas · 12 temas · 3 vidas
+            145 perguntas · 12 temas
           </p>
         </div>
 
